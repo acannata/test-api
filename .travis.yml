@@ -1,0 +1,38 @@
+language: php
+
+php:
+  - '8.0.0'
+
+services:
+  - mysql
+  - redis-server
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=5acc45b5f48d4ca2a5baa0d22ee9a10890b29a76b3ef34a936fdd0ba8c5d7ba8
+    - DB_HOST=127.0.0.1
+    - DB_NAME=php_slim_rest_api
+    - DB_USER=root
+    - DB_PASS=
+    - DB_PORT=3306
+    - DISPLAY_ERROR_DETAILS=true
+    - APP_DOMAIN='https://www.khanakat.com'
+    - SECRET_KEY=YourSuperSecret-KeY
+    - REDIS_ENABLED=true
+    - REDIS_URL=localhost
+    - LOGS_ENABLED=true
+
+before_install:
+  - mysql -e 'CREATE DATABASE php_slim_rest_api;'
+
+before_script:
+  - mysql php_slim_rest_api < database/database.sql
+  - composer update
+  - composer install
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+script:
+  - vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml --whitelist src
+#  - if [ $(phpenv version-name) = "8.0" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi

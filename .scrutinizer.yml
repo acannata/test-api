@@ -1,0 +1,50 @@
+build:
+    nodes:
+        analysis:
+            tests:
+              override:
+                - php-scrutinizer-run
+        # coverage:
+        #     tests:
+        #         override:
+        #             - 
+        #                 command: 'vendor/bin/phpunit --coverage-clover=clover.xml'
+        #                 coverage:
+        #                     file: clover.xml
+        #                     format: clover
+        my-node:
+            services:
+                redis: 4
+    environment:
+        variables:
+            DB_HOST: '127.0.0.1'
+            DB_NAME: 'php_slim_rest_api'
+            DB_USER: 'root'
+            DB_PASS: ''
+            DB_PORT: '3306'
+            DISPLAY_ERROR_DETAILS: true
+            #APP_DOMAIN: 'https://php-slim-rest-api-sql.herokuapp.com'
+            SECRET_KEY: 'YourSuperSecret-KeY'
+            REDIS_ENABLED: true
+            REDIS_URL: 'localhost'
+            LOGS_ENABLED: false
+        php:
+            version: 8.0.0
+    project_setup:
+        before:    
+            #- sudo apt-get install mysql-server
+            #- sudo service start mysql || true
+            - sudo service mysql restart
+            - mysql -e "CREATE DATABASE php_slim_rest_api"
+            - mysql php_slim_rest_api < database/database.sql
+        override:
+            - php-scrutinizer-run
+            # -
+            #     command: 'vendor/bin/phpunit --coverage-clover=clover.xml'
+            #     coverage:
+            #         file: 'clover.xml'
+            #         format: 'clover'
+    dependencies:
+        override:
+            - composer update
+            - composer install
